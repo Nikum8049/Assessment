@@ -2,49 +2,78 @@ package Guru99Assessment;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.testng.annotations.BeforeClass;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import util.Driveconect;
+
+import static org.testng.Assert.assertEquals;
 
 public class Guru99Parameterise {
-    WebDriver driver =null;
-
-    @BeforeClass
-    public void  setup()
-    {
-        driver= Driveconect.connect("https://www.demo.guru99.com/V4/index.php");
-    }
+    WebDriver driver = null;
 
     @Test(dataProvider = "dp")
-    public void test(String userId, String userPass)
-    {
+    public void test(String function, String keyword, String locator, String location, String data) {
 
-      WebElement userid=driver.findElement(By.name("uid"));
-      WebElement upass= driver.findElement(By.name("password"));
-      WebElement login=driver.findElement(By.name("btnLogin"));
-
-      userid.clear();
-      userid.sendKeys(userId);
-      upass.clear();
-      upass.sendKeys(userPass);
-      login.click();
-
-       driver.navigate().back();
-
-
+        System.out.println(function + "" + keyword + "" + locator + "" + location + "" + data);
+        if (keyword.equals("browser")) {
+            if (data.equals("chrome")) {
+                System.setProperty("Webdriver.chrome.driver", "E:\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe");
+                driver = new ChromeDriver();
+            }
+        }
+        else if (keyword.equals("url"))
+        {
+                driver.get(data);
+            }
+        else if (keyword.equals("type"))
+        {
+                if (locator.equals("id"))
+                {
+                    driver.findElement(By.id(location)).sendKeys(data);
+                }
+                else if (locator.equals("name"))
+                {
+                    driver.findElement(By.name(location)).sendKeys(data);
+                }
+                else if (locator.equals("xpath"))
+                {
+                    driver.findElement(By.xpath(location)).sendKeys(data);
+                }
+            }
+        else if (keyword.equals("click"))
+        {
+                if (locator.equals("id"))
+                {
+                    driver.findElement(By.id(location)).click();
+                }
+                else if (locator.equals("name"))
+                {
+                    driver.findElement(By.name(location)).click();
+                }
+                else if (locator.equals("xpath"))
+                {
+                    driver.findElement(By.xpath(location)).click();
+                }
+            }
 
     }
     @DataProvider(name="dp")
-    public Object[][] setData()
+    public  Object[][] getData()
     {
-        Object obj [][]= new Object[2][2];
-        obj[0][0] = "mngr591125";
-        obj[0][1] = "tAbumEm";
+        ExcelReader ed = new ExcelReader("E:\\Framework_Excel\\testframework.xlsx","Guru");
+        int rows = ed.rowCount();
+        int cols = ed.colCount();
 
-        obj[1][0] = "tech@gmail.com";
-        obj[1][1] = "tech";
+        Object obj[][] =new Object[rows-1][cols];
+        for (int i = 1; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                String data = ed.getData(i, j);
+                obj[i-1][j] = data;
+            }
+        }
         return obj;
     }
+
 }
